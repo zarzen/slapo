@@ -339,6 +339,7 @@ def gen_embedding_hooks(sch, vocab_size):
     """
     vocab_start_index = sch.rank * vocab_size // sch.world_size
     vocab_end_index = (sch.rank + 1) * vocab_size // sch.world_size
+    # print(f"sch.rank {sch.rank} vocab size {vocab_size} start index {vocab_start_index} end index {vocab_end_index}")
 
     def fwd_pre_hook(_module, _input):
         # Mask the input
@@ -349,8 +350,7 @@ def gen_embedding_hooks(sch, vocab_size):
 
     def fwd_post_hook(_module, _input, output):
         # Mask the output embedding
-        input_mask = (_input[0] < vocab_start_index) | (_input[0] >= vocab_end_index)
-        output[input_mask, :] = 0.0
+        output[_input[0] == 0, :] = 0.0
         # Reduce across all the model parallel GPUs
         output = reduce_forward_output(output, sch.group)
         return output

@@ -26,7 +26,15 @@ def get_ds_config(
     config_dict = {
         "help": desc,
         "steps_per_print": 10,
-        "optimizer": {"type": "AdamW", "params": {"lr": 0.0001}},
+        "optimizer": {
+            "type": "AdamW", 
+            "params": {
+                "lr": 1e-3,
+                "eps": 1e-8,
+                "weight_decay": 0.5,
+                "betas": [0.9, 0.98]
+            }
+        },
         "fp16": {"enabled": fp16, "initial_scale_power": 12},
         "bf16": {"enabled": bf16},
         "gradient_clipping": 1.0,
@@ -36,6 +44,15 @@ def get_ds_config(
             "sequence_parallel": sequence_parallel,
         },
         "wall_clock_breakdown": False,
+        "scheduler": {
+            "type": "WarmupLR",
+            "params": {
+                "warmup_min_lr": 0,
+                "warmup_max_lr": 0.001,
+                "warmup_num_steps": 2000,
+                "warmup_type": "linear"
+            }
+        },
     }
 
     if zero_stage > 0:

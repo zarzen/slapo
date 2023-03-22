@@ -4,6 +4,7 @@
 import os
 import argparse
 
+import os
 import deepspeed
 import torch
 import torch.distributed as dist
@@ -64,6 +65,7 @@ def train(args):
 
     topology, group = None, None
     if not SINGLE_DEVICE_FOR_DEBUG:
+        # deepspeed.init_distributed(dist_backend="nccl", distributed_port=os.environ.get('MASTER_PORT'))
         deepspeed.init_distributed(dist_backend="nccl")
         logger.info("Use deepspeed to initialize", ranks=0)
         if enable_pipeline:
@@ -163,6 +165,7 @@ def train(args):
             args.bf16,
             args.sequence_parallel,
         )
+        print(f'ds config dict {ds_config_dict}')
 
         model, _ = slapo.build(
             sch,
